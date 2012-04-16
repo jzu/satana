@@ -1,0 +1,54 @@
+Satana
+======
+
+Version 0.666
+
+Satana (Saturation Analogique) is a LADSPA plugin which can be used with any
+compatible host, such as Audacity. It tries hard to simulate an analogue
+saturation device, such as a magnetic tape recorder whose VU meters are stuck
+in the red, or an overdriven tube amplifier's push-pull stage. In my 
+opinion, it fails, but musicians may nonetheless find the resulting effect 
+interesting.
+
+Directly derived from the [Despiker](https://github.com/jzu/despiker), it
+applies a convolution matrix acting as a low-pass filter to each signal point,
+with a twist: when the point is at the maximum (0 dB), the signal is totally
+filtered, while near zero, the dry signal stays almost untouched. The default
+application function is non-linear here (`sin(x*M_PI/2)`) to have the filtering
+really appearing only when approaching the maximum intensity; it could be any
+other function where `f(0)=0`, `f(1)=1` and `f(-1)=-1`, like `x³` or
+`x*ln(|x*e|)`. The processing speed depends on the nature and the complexity of
+the function. `sin(x)` is slow enough, but feel free to experiment.
+
+Like the Despiker, values for the convolution matrix have been chosen by ear.
+Unlike the Despiker, there is no treshold value and the filtering applies to
+all points in the signal, without discrimination - but with a gradient. All in
+all, Satana can be seen as a fork, since both codebases are very similar
+right now.
+
+Copyright (C) Jean Zundel <jzu@free.fr> 2012
+
+Free software, licensed under the GNU GPL v3.
+
+Compiling
+---------
+
+The `ladspa.h` file, included in this project, comes from the ladspa-sdk
+package and allows to compile the plugin without installing the whole package.
+Type:
+
+`make`
+
+`sudo make install`
+
+That's about it. You can now use the plugin.
+
+Running
+-------
+
+Once the `satana_4742.so` library has been copied to `/usr/lib/ladspa/`, 
+enter Audacity and choose <strike>a victim</strike> an audio track. Go to 
+*Effects > Modules... > Satana*.
+
+Done.
+
