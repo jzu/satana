@@ -51,27 +51,19 @@ void _init(); // forward declaration
 
 #define HLF_CNVL 8
 #define LEN_CNVL (2*HLF_CNVL+1)
-#define F(x) sin (x * M_PI_2)
-#define G(x) (2*x - F(x))
+#define F(x) sin (2*x * M_PI_2)
 
 /* Convolution matrix */
 
 // If 16 surrounding points act on a given point, then the cutoff frequency
 // could well be something like 22050/8 = 2756 Hz. Perhaps. Slope is unknown.
 
-
 LADSPA_Data matrix [LEN_CNVL] = {                  // Mean should be 1 
   0.2, 0.4, 0.6, 0.8,   1, 1.2, 1.4, 1.6,
   2.6,
   1.6, 1.4, 1.2,   1, 0.8, 0.6, 0.4, 0.2
 };
-/*
-LADSPA_Data matrix [LEN_CNVL] = {                  // Test matrix
-  0,0,0,0,0,0,0,0,
-  17,
-  0,0,0,0,0,0,0,0
-};
-*/
+
 
 LADSPA_Data *cnvl = matrix + HLF_CNVL;             // Center pointer
 
@@ -79,8 +71,6 @@ LADSPA_Data *cnvl = matrix + HLF_CNVL;             // Center pointer
 /*****************************************************************************
  * Copy input to output while applying the progressive filter
  * F(x) is #define'd as sin(x) by default
- * G(x) is its mirror function against y=x 
- * The combination of these 2 functions SHOULD be linear. It is NOT, yet.
  *****************************************************************************/
 
 void runSatana (LADSPA_Handle Instance,
@@ -102,10 +92,8 @@ void runSatana (LADSPA_Handle Instance,
     sum = 0;
     for (c = -HLF_CNVL ; c <= HLF_CNVL; c++)
       sum += in [i+c] * cnvl [c];
-      out [i] = sqrt (fabs (in [i]) * (1 - fabs (F (in [i]))))
-              + sqrt (fabs (sum/LEN_CNVL) * fabs (G (in [i])));
-    if (in [i] < 0)
-      out [i] = -out [i];
+      out [i] = in [i] * (1 - fabs (F (in [i])))
+              + (sum/LEN_CNVL) * fabs (F (in [i]));
   }
 }
 
