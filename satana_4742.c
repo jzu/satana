@@ -51,7 +51,8 @@ void _init(); // forward declaration
 
 #define HLF_CNVL 8
 #define LEN_CNVL (2*HLF_CNVL+1)
-#define F(x) sin (2*x * M_PI_2)
+//#define F(x) sin (2*x * M_PI_2)
+#define F(x) sin (x * M_PI_2)
 
 /* Convolution matrix */
 

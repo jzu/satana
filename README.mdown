@@ -3,11 +3,6 @@ Satana
 
 Version 0.666
 
-Warning:
-At the moment, this software DOESN'T WORK as expected. The "linear result
-for a null matrix" problem has been fixed, yet another problem subsides
-with near-0dB samples being seemingly immune to convolution.
-
 Satana (Saturation Analogique) is a LADSPA plugin which can be used with any
 compatible host, such as Audacity. It tries hard to simulate an analogue
 saturation device, such as a magnetic tape recorder whose VU meters are stuck
