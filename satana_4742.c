@@ -49,10 +49,17 @@ void _init(); // forward declaration
 
 /* Plugin-specific defines */
 
+#define THRESHOLD .5
 #define HLF_CNVL 8
 #define LEN_CNVL (2*HLF_CNVL+1)
-//#define F(x) sin (2*x * M_PI_2)
-#define F(x) sin (x * M_PI_2)
+
+/* Functions applying/mixing the convolution */
+
+// F(x) for filtered
+// G(x) for dry
+
+#define F(x) (pow (x, 6))
+#define G(x) (1 - F(x))
 
 /* Convolution matrix */
 
@@ -93,8 +100,10 @@ void runSatana (LADSPA_Handle Instance,
     sum = 0;
     for (c = -HLF_CNVL ; c <= HLF_CNVL; c++)
       sum += in [i+c] * cnvl [c];
-      out [i] = in [i] * (1 - fabs (F (in [i])))
-              + (sum/LEN_CNVL) * fabs (F (in [i]));
+    out [i] = F (fabs (in [i])) * fabs (sum/LEN_CNVL) 
+            + G (fabs (in [i])) * fabs (in [i]);
+    if (in [i] < 0)
+      out [i] = -out [i];
   }
 }
 
