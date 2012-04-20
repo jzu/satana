@@ -6,7 +6,7 @@ Version 0.666
 Satana (Saturation Analogique) is a LADSPA plugin which can be used with any
 compatible host, such as Audacity. It tries hard to simulate an analogue
 saturation device, such as a magnetic tape recorder whose VU meters are stuck
-in the red, or an overdriven tube amplifier's push-pull stage. In my 
+in the red, or a tube amplifier's push-pull stage. In my 
 opinion, it fails, but musicians may nonetheless find the resulting effect 
 interesting.
 
@@ -26,6 +26,10 @@ codebases are very similar right now.
 
 There is no control over the effect at the moment, but you can re-apply it a 
 number of times in order to accentuate it.
+
+An additional function could be added to compress the signal, as well as a
+high-pass filter to slightly attenuate the low frequency boost it could 
+generate.
 
 Copyright (C) Jean Zundel <jzu@free.fr> 2012
 
@@ -48,7 +52,7 @@ Running
 -------
 
 Once the `satana_4742.so` library has been copied to `/usr/lib/ladspa/`, 
-enter Audacity and choose <strike>a victim</strike> an audio track. Go to 
+enter Audacity and choose a victim^H^H^H^H^H^H track. Go to 
 *Effects > Modules... > Satana*.
 
 Done.
