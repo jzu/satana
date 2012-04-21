@@ -52,7 +52,7 @@ Running
 -------
 
 Once the `satana_4742.so` library has been copied to `/usr/lib/ladspa/`, 
-enter Audacity and choose a victim^H^H^H^H^H^H track. Go to 
+enter Audacity and choose a victim^W track. Go to 
 *Effects > Modules... > Satana*.
 
 Done.

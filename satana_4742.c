@@ -36,7 +36,7 @@ typedef struct {
 #define DESPIKER_OUTPUT1 1
 
 
-/* Yeuch */
+// Yeuch
 
 #ifdef WIN32
 #define _WINDOWS_DLL_EXPORT_ __declspec(dllexport)
@@ -47,22 +47,22 @@ void _init(); // forward declaration
 #endif
 
 
-/* Plugin-specific defines */
+// Plugin-specific defines
 
 #define THRESHOLD .5
-#define HLF_CNVL 8
-#define LEN_CNVL (2*HLF_CNVL+1)
+#define HLF_CNVL  8
+#define LEN_CNVL  (2*HLF_CNVL+1)
 
-/* Functions applying/mixing the convolution */
 
+// Functions applying/mixing the convolution
 // F(x) for filtered
 // G(x) for dry
 
 #define F(x) (pow (x, 6))
 #define G(x) (1 - F(x))
 
-/* Convolution matrix */
 
+// Convolution matrix
 // If 16 surrounding points act on a given point, then the cutoff frequency
 // could well be something like 22050/8 = 2756 Hz. Perhaps. Slope is unknown.
 
@@ -78,7 +78,7 @@ LADSPA_Data *cnvl = matrix + HLF_CNVL;             // Center pointer
 
 /*****************************************************************************
  * Copy input to output while applying the progressive filter
- * F(x) is #define'd as sin(x) by default
+ * F(x) is #define'd as x^6 by default
  *****************************************************************************/
 
 void runSatana (LADSPA_Handle Instance,
