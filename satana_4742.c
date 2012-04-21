@@ -28,12 +28,14 @@
 
 
 typedef struct {
+  LADSPA_Data * m_pfControlValue;
   LADSPA_Data * m_pfInputBuffer1;
   LADSPA_Data * m_pfOutputBuffer1;
 } Satana;
 
-#define DESPIKER_INPUT1  0
-#define DESPIKER_OUTPUT1 1
+#define SATANA_INPUT  0
+#define SATANA_OUTPUT 1
+#define SATANA_CONTROL1 2
 
 
 // Yeuch
@@ -58,7 +60,7 @@ void _init(); // forward declaration
 // F(x) for filtered
 // G(x) for dry
 
-#define F(x) (pow (x, 6))
+#define F(x) (pow (x, curve))
 #define G(x) (1 - F(x))
 
 
@@ -87,6 +89,7 @@ void runSatana (LADSPA_Handle Instance,
 
   LADSPA_Data  *in;
   LADSPA_Data  *out;
+  LADSPA_Data  curve;
   Satana       *psSatana;
   unsigned long i;
   long          c;
@@ -95,6 +98,7 @@ void runSatana (LADSPA_Handle Instance,
   psSatana = (Satana *) Instance;
   in = psSatana->m_pfInputBuffer1;
   out = psSatana->m_pfOutputBuffer1;
+  curve = *(psSatana->m_pfControlValue);
 
   for (i = HLF_CNVL; i < SampleCount-HLF_CNVL; i++) {
     sum = 0;
@@ -125,10 +129,13 @@ void connectPortToSatana (LADSPA_Handle Instance,
 
   psSatana = (Satana *) Instance;
   switch (Port) {
-    case DESPIKER_INPUT1:
+    case SATANA_CONTROL1:
+      psSatana->m_pfControlValue = DataLocation;
+      break;
+    case SATANA_INPUT:
       psSatana->m_pfInputBuffer1 = DataLocation;
       break;
-    case DESPIKER_OUTPUT1:
+    case SATANA_OUTPUT:
       psSatana->m_pfOutputBuffer1 = DataLocation;
       break;
   }
@@ -167,27 +174,40 @@ void _init() {
     g_psSatanaDescr->Name             = strdup ("Satana");
     g_psSatanaDescr->Maker            = strdup ("Jean Zundel");
     g_psSatanaDescr->Copyright        = strdup ("GPL v3");
-    g_psSatanaDescr->PortCount        = 2;
+    g_psSatanaDescr->PortCount        = 3;
+
     piPortDescriptors
-      = (LADSPA_PortDescriptor *) calloc (2, sizeof (LADSPA_PortDescriptor));
+      = (LADSPA_PortDescriptor *) calloc (3, sizeof (LADSPA_PortDescriptor));
     g_psSatanaDescr->PortDescriptors
       = (const LADSPA_PortDescriptor *) piPortDescriptors;
-    piPortDescriptors [DESPIKER_INPUT1]
+    piPortDescriptors [SATANA_CONTROL1]
+      = LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL;
+    piPortDescriptors [SATANA_INPUT]
       = LADSPA_PORT_INPUT | LADSPA_PORT_AUDIO;
-    piPortDescriptors [DESPIKER_OUTPUT1]
+    piPortDescriptors [SATANA_OUTPUT]
       = LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO;
     pcPortNames
-      = (char **) calloc (2, sizeof(char *));
+      = (char **) calloc (3, sizeof(char *));
     g_psSatanaDescr->PortNames 
       = (const char **) pcPortNames;
-    pcPortNames [DESPIKER_INPUT1]  = strdup ("Input");
-    pcPortNames [DESPIKER_OUTPUT1] = strdup ("Output");
+
+    pcPortNames [SATANA_CONTROL1] = strdup ("Curve (less is more)");
+    pcPortNames [SATANA_INPUT]    = strdup ("Input");
+    pcPortNames [SATANA_OUTPUT]   = strdup ("Output");
+
     psPortRangeHints 
-      = ((LADSPA_PortRangeHint *) calloc (2, sizeof (LADSPA_PortRangeHint)));
+      = ((LADSPA_PortRangeHint *) calloc (3, sizeof (LADSPA_PortRangeHint)));
     g_psSatanaDescr->PortRangeHints
       = (const LADSPA_PortRangeHint *) psPortRangeHints;
-    psPortRangeHints [DESPIKER_INPUT1].HintDescriptor  = 0;
-    psPortRangeHints [DESPIKER_OUTPUT1].HintDescriptor = 0;
+    psPortRangeHints [SATANA_CONTROL1].HintDescriptor
+      = (LADSPA_HINT_BOUNDED_BELOW 
+         | LADSPA_HINT_LOGARITHMIC
+         | LADSPA_HINT_DEFAULT_MIDDLE);
+    psPortRangeHints [SATANA_CONTROL1].LowerBound   = 0;
+    psPortRangeHints [SATANA_CONTROL1].UpperBound   = 10;
+    psPortRangeHints [SATANA_INPUT].HintDescriptor  = 0;
+    psPortRangeHints [SATANA_OUTPUT].HintDescriptor = 0;
+
     g_psSatanaDescr->instantiate  = instantiateSatana;
     g_psSatanaDescr->connect_port = connectPortToSatana;
     g_psSatanaDescr->activate     = NULL;
@@ -211,7 +231,7 @@ void deleteDescriptor (LADSPA_Descriptor * psDescriptor) {
     free ((char *)psDescriptor->Copyright);
     free ((LADSPA_PortDescriptor *)psDescriptor->PortDescriptors);
     for (lIndex = 0; lIndex < psDescriptor->PortCount; lIndex++)
-      free ((char *)(psDescriptor->PortNames[lIndex]));
+      free ((char *)(psDescriptor->PortNames [lIndex]));
     free ((char **)psDescriptor->PortNames);
     free ((LADSPA_PortRangeHint *)psDescriptor->PortRangeHints);
     free (psDescriptor);
