@@ -20,7 +20,7 @@ function. Interestingly, additional high-order harmonics (unwanted
 low-intensity noise) are created while applying the low-pass filter - this
 behaviour may depend on matrix values.
 
-The single cursor, "Curve", controls the power function parameter. 
+The single functional cursor, "Selectivity", controls the power function parameter. 
 `f(0) = exp(0) = 1` means the signal is totally filtered, leading to a severe
 loss of high frequencies, while `f(10)` means only the very few samples near
 0dB are affected.
