@@ -28,14 +28,18 @@
 
 
 typedef struct {
-  LADSPA_Data * m_pfControlValue;
   LADSPA_Data * m_pfInputBuffer1;
   LADSPA_Data * m_pfOutputBuffer1;
+  LADSPA_Data * m_pfControlValue1;
+  LADSPA_Data * m_pfControlValue2;
+  LADSPA_Data * m_pfControlValue3;
 } Satana;
 
 #define SATANA_INPUT  0
 #define SATANA_OUTPUT 1
 #define SATANA_CONTROL1 2
+#define SATANA_CONTROL2 3
+#define SATANA_CONTROL3 4
 
 
 // Yeuch
@@ -51,7 +55,6 @@ void _init(); // forward declaration
 
 // Plugin-specific defines
 
-#define THRESHOLD .5
 #define HLF_CNVL  8
 #define LEN_CNVL  (2*HLF_CNVL+1)
 
@@ -66,7 +69,9 @@ void _init(); // forward declaration
 
 // Convolution matrix
 // If 16 surrounding points act on a given point, then the cutoff frequency
-// could well be something like 22050/8 = 2756 Hz. Perhaps. Slope is unknown.
+// could well be something like 22050/8 = 2756 Hz, but observations with
+// Audacity's spectrum display show it could be around 1800 Hz @ ~6 dB/octave
+// with the current matrix. To be confirmed.
 
 LADSPA_Data matrix [LEN_CNVL] = {                  // Mean should be 1 
   0.2, 0.4, 0.6, 0.8,   1, 1.2, 1.4, 1.6,
@@ -80,7 +85,7 @@ LADSPA_Data *cnvl = matrix + HLF_CNVL;             // Center pointer
 
 /*****************************************************************************
  * Copy input to output while applying the progressive filter
- * F(x) is #define'd as x^6 by default
+ * F(x) is #define'd as x^curve
  *****************************************************************************/
 
 void runSatana (LADSPA_Handle Instance,
@@ -89,7 +94,7 @@ void runSatana (LADSPA_Handle Instance,
 
   LADSPA_Data  *in;
   LADSPA_Data  *out;
-  LADSPA_Data  curve;
+  LADSPA_Data   curve;
   Satana       *psSatana;
   unsigned long i;
   long          c;
@@ -98,7 +103,7 @@ void runSatana (LADSPA_Handle Instance,
   psSatana = (Satana *) Instance;
   in = psSatana->m_pfInputBuffer1;
   out = psSatana->m_pfOutputBuffer1;
-  curve = *(psSatana->m_pfControlValue);
+  curve = *(psSatana->m_pfControlValue1);
 
   for (i = HLF_CNVL; i < SampleCount-HLF_CNVL; i++) {
     sum = 0;
@@ -130,10 +135,16 @@ void connectPortToSatana (LADSPA_Handle Instance,
   psSatana = (Satana *) Instance;
   switch (Port) {
     case SATANA_CONTROL1:
-      psSatana->m_pfControlValue = DataLocation;
+      psSatana->m_pfControlValue1 = DataLocation;
+      break;
+    case SATANA_CONTROL2:
+      psSatana->m_pfControlValue2 = DataLocation;
+      break;
+    case SATANA_CONTROL3:
+      psSatana->m_pfControlValue3 = DataLocation;
       break;
     case SATANA_INPUT:
-      psSatana->m_pfInputBuffer1 = DataLocation;
+      psSatana->m_pfInputBuffer1  = DataLocation;
       break;
     case SATANA_OUTPUT:
       psSatana->m_pfOutputBuffer1 = DataLocation;
@@ -174,39 +185,59 @@ void _init() {
     g_psSatanaDescr->Name             = strdup ("Satana");
     g_psSatanaDescr->Maker            = strdup ("Jean Zundel");
     g_psSatanaDescr->Copyright        = strdup ("GPL v3");
-    g_psSatanaDescr->PortCount        = 3;
+    g_psSatanaDescr->PortCount        = 5;
 
     piPortDescriptors
-      = (LADSPA_PortDescriptor *) calloc (3, sizeof (LADSPA_PortDescriptor));
+      = (LADSPA_PortDescriptor *) calloc (5, sizeof (LADSPA_PortDescriptor));
     g_psSatanaDescr->PortDescriptors
       = (const LADSPA_PortDescriptor *) piPortDescriptors;
-    piPortDescriptors [SATANA_CONTROL1]
-      = LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL;
     piPortDescriptors [SATANA_INPUT]
       = LADSPA_PORT_INPUT | LADSPA_PORT_AUDIO;
     piPortDescriptors [SATANA_OUTPUT]
       = LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO;
-    pcPortNames
-      = (char **) calloc (3, sizeof(char *));
-    g_psSatanaDescr->PortNames 
-      = (const char **) pcPortNames;
+    piPortDescriptors [SATANA_CONTROL1]
+      = LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL;
+    piPortDescriptors [SATANA_CONTROL2]
+      = LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL;
+    piPortDescriptors [SATANA_CONTROL3]
+      = LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL;
 
-    pcPortNames [SATANA_CONTROL1] = strdup ("Curve (less is more)");
+    pcPortNames = (char **) calloc (5, sizeof(char *));
+    g_psSatanaDescr->PortNames = (const char **) pcPortNames;
     pcPortNames [SATANA_INPUT]    = strdup ("Input");
     pcPortNames [SATANA_OUTPUT]   = strdup ("Output");
+    pcPortNames [SATANA_CONTROL1] = strdup ("Selectivity");
+    pcPortNames [SATANA_CONTROL2] = strdup ("Reserved");
+    pcPortNames [SATANA_CONTROL3] = strdup ("Reserved");
 
     psPortRangeHints 
-      = ((LADSPA_PortRangeHint *) calloc (3, sizeof (LADSPA_PortRangeHint)));
+      = ((LADSPA_PortRangeHint *) calloc (5, sizeof (LADSPA_PortRangeHint)));
     g_psSatanaDescr->PortRangeHints
       = (const LADSPA_PortRangeHint *) psPortRangeHints;
+
+    psPortRangeHints [SATANA_INPUT].HintDescriptor  = 0;
+    psPortRangeHints [SATANA_OUTPUT].HintDescriptor = 0;
+
     psPortRangeHints [SATANA_CONTROL1].HintDescriptor
       = (LADSPA_HINT_BOUNDED_BELOW 
          | LADSPA_HINT_LOGARITHMIC
          | LADSPA_HINT_DEFAULT_MIDDLE);
     psPortRangeHints [SATANA_CONTROL1].LowerBound   = 0;
     psPortRangeHints [SATANA_CONTROL1].UpperBound   = 10;
-    psPortRangeHints [SATANA_INPUT].HintDescriptor  = 0;
-    psPortRangeHints [SATANA_OUTPUT].HintDescriptor = 0;
+
+    psPortRangeHints [SATANA_CONTROL2].HintDescriptor
+      = (LADSPA_HINT_BOUNDED_BELOW 
+         | LADSPA_HINT_LOGARITHMIC
+         | LADSPA_HINT_DEFAULT_MIDDLE);
+    psPortRangeHints [SATANA_CONTROL2].LowerBound   = 0;
+    psPortRangeHints [SATANA_CONTROL2].UpperBound   = 10;
+
+    psPortRangeHints [SATANA_CONTROL3].HintDescriptor
+      = (LADSPA_HINT_BOUNDED_BELOW 
+         | LADSPA_HINT_LOGARITHMIC
+         | LADSPA_HINT_DEFAULT_MIDDLE);
+    psPortRangeHints [SATANA_CONTROL3].LowerBound   = 0;
+    psPortRangeHints [SATANA_CONTROL3].UpperBound   = 10;
 
     g_psSatanaDescr->instantiate  = instantiateSatana;
     g_psSatanaDescr->connect_port = connectPortToSatana;

@@ -15,15 +15,18 @@ with a twist: when the point is at the maximum (0 dB), the signal is totally
 filtered, while near zero, the dry signal stays almost untouched. The default
 application function is non-linear (a power curve) in order to convolve mostly
 when approaching the maximum intensity; B&eacute;zier curves could do the job
-as well. The processing speed depends on the nature and the complexity of
-the function.
+as well. The processing speed depends on the nature and the complexity of the
+function. Interestingly, additional high-order harmonics (unwanted
+low-intensity noise) are created while applying the low-pass filter - this
+behaviour may depend on matrix values.
 
 The single cursor, "Curve", controls the power function parameter. 
 `f(0) = exp(0) = 1` means the signal is totally filtered, leading to a severe
 loss of high frequencies, while `f(10)` means only the very few samples near
 0dB are affected.
 
-We need one or two supplementary controls, this time to compute matrix values.
+Two supplementary controls have been reserved, this time to compute matrix 
+values.
 
 This effect is not evil enough, yet. An additional function could be added to
 compress the signal, as well as a high-pass filter to slightly attenuate the
@@ -51,7 +54,7 @@ Running
 
 Once the `satana_4742.so` library has been copied to `/usr/lib/ladspa/`, 
 enter Audacity and choose a victim^W track. Go to 
-*Effects > Modules... > Satana*.
+*Effects > Modules... > Satana...*.
 
 Done.
 
