@@ -5,7 +5,7 @@ Version 0.666
 
 Satana (Saturation Analogique) is a LADSPA plugin which can be used with any
 compatible host, such as Audacity. It tries hard to simulate an analogue
-saturation device, such as a magnetic tape recorder whose VU meters are stuck
+saturation device, like a magnetic tape recorder whose VU meters are stuck
 in the red, or a tube amplifier's push-pull stage. In my opinion, it fails, but
 musicians may nonetheless find the resulting effect interesting.
 
@@ -30,7 +30,7 @@ values.
 
 This effect is not evil enough, yet. An additional function could be added to
 compress the signal, as well as a high-pass filter to slightly attenuate the
-low frequency boost it can generate for low "Curve" values.
+low frequency boost it can generate for low "Selectivity" values.
 
 Copyright (C) Jean Zundel <jzu@free.fr> 2012
 
