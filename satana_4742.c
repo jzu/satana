@@ -63,7 +63,7 @@ void _init(); // forward declaration
 // F(x) for filtered
 // G(x) for dry
 
-#define F(x) (pow (x, curve))
+#define F(x) (pow (x, select))
 #define G(x) (1 - F(x))
 
 
@@ -72,6 +72,9 @@ void _init(); // forward declaration
 // could well be something like 22050/8 = 2756 Hz, but observations with
 // Audacity's spectrum display show it could be around 1800 Hz @ ~6 dB/octave
 // with the current matrix. To be confirmed.
+// Experimental feature: its contents are re-computed at the beginning of
+// runSatana() from a gaussian function (1/(2*sqrt(s*M_PI))*exp(-x*x/(2*s*s))
+// whose "s" factor (sigma) comes from the second control.
 
 LADSPA_Data matrix [LEN_CNVL] = {                  // Mean should be 1 
   0.2, 0.4, 0.6, 0.8,   1, 1.2, 1.4, 1.6,
@@ -85,7 +88,8 @@ LADSPA_Data *cnvl = matrix + HLF_CNVL;             // Center pointer
 
 /*****************************************************************************
  * Copy input to output while applying the progressive filter
- * F(x) is #define'd as x^curve
+ * (whose values are first computed as a gaussian)
+ * Application function F(x) is #define'd as x^select
  *****************************************************************************/
 
 void runSatana (LADSPA_Handle Instance,
@@ -94,20 +98,26 @@ void runSatana (LADSPA_Handle Instance,
 
   LADSPA_Data  *in;
   LADSPA_Data  *out;
-  LADSPA_Data   curve;
+  LADSPA_Data   select;
+  LADSPA_Data   sigma;
   Satana       *psSatana;
   unsigned long i;
   long          c;
   LADSPA_Data   sum;
 
   psSatana = (Satana *) Instance;
-  in = psSatana->m_pfInputBuffer1;
+  in  = psSatana->m_pfInputBuffer1;
   out = psSatana->m_pfOutputBuffer1;
-  curve = *(psSatana->m_pfControlValue1);
+  select = *(psSatana->m_pfControlValue1);
+  sigma  = *(psSatana->m_pfControlValue2);
+                                                   // Matrix is gaussian
+  for (c = -HLF_CNVL; c <= HLF_CNVL; c++) 
+    cnvl [c] = 17 * pow (M_E, -c * c / (2 * sigma * sigma)) / 
+                    (sigma * sqrt (2 * M_PI));
 
   for (i = HLF_CNVL; i < SampleCount-HLF_CNVL; i++) {
     sum = 0;
-    for (c = -HLF_CNVL ; c <= HLF_CNVL; c++)
+    for (c = -HLF_CNVL ; c <= HLF_CNVL; c++)       // Convolve
       sum += in [i+c] * cnvl [c];
     out [i] = F (fabs (in [i])) * fabs (sum/LEN_CNVL) 
             + G (fabs (in [i])) * fabs (in [i]);
@@ -207,8 +217,8 @@ void _init() {
     pcPortNames [SATANA_INPUT]    = strdup ("Input");
     pcPortNames [SATANA_OUTPUT]   = strdup ("Output");
     pcPortNames [SATANA_CONTROL1] = strdup ("Selectivity");
-    pcPortNames [SATANA_CONTROL2] = strdup ("Reserved");
-    pcPortNames [SATANA_CONTROL3] = strdup ("Reserved");
+    pcPortNames [SATANA_CONTROL2] = strdup ("Filtering");
+    pcPortNames [SATANA_CONTROL3] = strdup ("reserved");
 
     psPortRangeHints 
       = ((LADSPA_PortRangeHint *) calloc (5, sizeof (LADSPA_PortRangeHint)));

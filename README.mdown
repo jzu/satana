@@ -20,13 +20,13 @@ function. Interestingly, additional high-order harmonics (unwanted
 low-intensity noise) are created while applying the low-pass filter - this
 behaviour may depend on matrix values.
 
-The single functional cursor, "Selectivity", controls the power function parameter. 
-`f(0) = exp(0) = 1` means the signal is totally filtered, leading to a severe
-loss of high frequencies, while `f(10)` means only the very few samples near
-0dB are affected.
+The first functional cursor, "Selectivity", controls the power function 
+parameter. `f(0) = exp(0) = 1` means the signal is totally filtered, leading 
+to a severe loss of high frequencies, while `f(10)` means only the very few 
+samples near 0dB are affected.
 
-Two supplementary controls have been reserved, this time to compute matrix 
-values.
+One supplementary control has been reserved, either for another matrix control,
+or for a compressor.
 
 This effect is not evil enough, yet. An additional function could be added to
 compress the signal, as well as a high-pass filter to slightly attenuate the
