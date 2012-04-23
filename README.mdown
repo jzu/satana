@@ -25,6 +25,9 @@ parameter. `f(0) = exp(0) = 1` means the signal is totally filtered, leading
 to a severe loss of high frequencies, while `f(10)` means only the very few 
 samples near 0dB are affected.
 
+The second one re-creates the convolution vector by computing values from a
+gaussian curve for a control value giving sigma.
+
 One supplementary control has been reserved, either for another matrix control,
 or for a compressor.
 
