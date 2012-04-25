@@ -45,13 +45,20 @@ typedef struct {
 // Yeuch
 
 #ifdef WIN32
-#define _WINDOWS_DLL_EXPORT_ __declspec(dllexport)
-int bIsFirstTime = 1; 
-void _init(); // forward declaration
+ #define _WINDOWS_DLL_EXPORT_ __declspec(dllexport)
+ int bIsFirstTime = 1; 
+ void _init(); // forward declaration
 #else
-#define _WINDOWS_DLL_EXPORT_ 
+ #define _WINDOWS_DLL_EXPORT_ 
 #endif
 
+#ifdef TARGET_OS_MAC
+ #define MACCONS  __attribute__((constructor))
+ #define MACDEST  __attribute__((destructor))
+#else
+ #define MACCONS
+ #define MACDEST
+#endif
 
 // Plugin-specific defines
 
@@ -177,7 +184,7 @@ LADSPA_Descriptor * g_psSatanaDescr = NULL;
 /* _init() is called automatically when the plugin library is first
    loaded. */
 
-void _init() {
+MACCONS void _init() {
 
   char ** pcPortNames;
   LADSPA_PortDescriptor * piPortDescriptors;
@@ -282,7 +289,7 @@ void deleteDescriptor (LADSPA_Descriptor * psDescriptor) {
 /*****************************************************************************/
 /* _fini() is called automatically when the library is unloaded. */
 
-void _fini() {
+MACDEST void _fini() {
 
   deleteDescriptor (g_psSatanaDescr);
 }
