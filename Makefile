@@ -3,7 +3,7 @@
 
 INCLUDES  = -I.
 LIBRARIES = -ldl -lm
-CFLAGS    = $(INCLUDES) -Wall -Werror -g -O3 -fPIC
+CFLAGS    = $(INCLUDES) -fno-common -Wall -Werror -g -O3 -fPIC
 PLUGIN    = satana_4742
 CC        = /usr/bin/cc
 LD        = /usr/bin/ld
