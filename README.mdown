@@ -20,20 +20,20 @@ function. Interestingly, additional high-order harmonics (unwanted
 low-intensity noise) are created while applying the low-pass filter - this
 behaviour may depend on matrix values.
 
-The first functional cursor, "Selectivity", controls the power function 
-parameter. `f(0) = exp(0) = 1` means the signal is totally filtered, leading 
-to a severe loss of high frequencies, while `f(10)` means only the very few 
+The first functional cursor, "Selectivity", controls the exponential function 
+parameter. `exp(0) = 1` means the signal is totally filtered, leading 
+to a severe loss of high frequencies, while `exp(10)` means only the very few 
 samples near 0dB are affected.
 
-The second one re-creates the convolution vector by computing values from a
-gaussian curve for a control value giving sigma.
+The second one, "Efficiency", determines the number of Savitzky-Golay filter 
+coefficients which are used to smooth out the signal (0, 1... 10 -> 5, 7... 25).
 
 One supplementary control has been reserved, either for another matrix control,
 or for a compressor.
 
 This effect is not evil enough, yet. An additional function could be added to
 compress the signal, as well as a high-pass filter to slightly attenuate the
-low frequency boost it can generate for low "Selectivity" values.
+low frequency boost it generates for low "Selectivity" values.
 
 Copyright (C) Jean Zundel <jzu@free.fr> 2012
 

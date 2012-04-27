@@ -45,24 +45,18 @@ typedef struct {
 // Yeuch
 
 #ifdef WIN32
- #define _WINDOWS_DLL_EXPORT_ __declspec(dllexport)
- int bIsFirstTime = 1; 
- void _init(); // forward declaration
+#define _WINDOWS_DLL_EXPORT_ __declspec(dllexport)
+int bIsFirstTime = 1; 
+void _init(); // forward declaration
 #else
- #define _WINDOWS_DLL_EXPORT_ 
+#define _WINDOWS_DLL_EXPORT_ 
 #endif
 
-#ifdef TARGET_OS_MAC
- #define MACCONS  __attribute__((constructor))
- #define MACDEST  __attribute__((destructor))
-#else
- #define MACCONS
- #define MACDEST
-#endif
 
 // Plugin-specific defines
 
-#define HLF_CNVL  8
+#define HGH_CNVL  11
+#define HLF_CNVL  12
 #define LEN_CNVL  (2*HLF_CNVL+1)
 
 
@@ -74,23 +68,58 @@ typedef struct {
 #define G(x) (1 - F(x))
 
 
-// Convolution matrix
-// If 16 surrounding points act on a given point, then the cutoff frequency
-// could well be something like 22050/8 = 2756 Hz, but observations with
-// Audacity's spectrum display show it could be around 1800 Hz @ ~6 dB/octave
-// with the current matrix. To be confirmed.
-// Experimental feature: its contents are re-computed at the beginning of
-// runSatana() from a gaussian function (1/(2*sqrt(s*M_PI))*exp(-x*x/(2*s*s))
-// whose "s" factor (sigma) comes from the second control.
+// Convolution vectors
+// Savitzky-Golay filter coefficients
+// http://www.statistics4u.com/fundstat_eng/cc_filter_savgolay.html
 
-LADSPA_Data matrix [LEN_CNVL] = {                  // Mean should be 1 
-  0.2, 0.4, 0.6, 0.8,   1, 1.2, 1.4, 1.6,
-  2.6,
-  1.6, 1.4, 1.2,   1, 0.8, 0.6, 0.4, 0.2
+//LADSPA_Data matrix [HGH_CNVL][LEN_CNVL+1] = {
+LADSPA_Data matrix [11][26] = {
+  { 0,       0,       0,       0,       0,       0,       0,       // 5
+    0,       0,       0,      -0.0857,  0.3429,  0.4857,  0.3429, 
+   -0.0857,  0,       0,       0,       0,       0,       0, 
+    0,       0,       0,       0},
+  { 0,       0,       0,       0,       0,       0,       0,       // 7
+    0,       0,      -0.0952,  0.1429,  0.2857,  0.3333,  0.2857, 
+    0.1429, -0.0952,  0,       0,       0,       0,       0, 
+    0,       0,       0,       0}, 
+  { 0,       0,       0,       0,       0,       0,       0,       // 9
+    0,      -0.0909,  0.0606,  0.1688,  0.2338,  0.2554,  0.2338,  
+    0.1688,  0.0606, -0.0909,  0,       0,       0,       0, 
+    0,       0,       0,       0}, 
+  { 0,       0,       0,       0,       0,       0,       0,       // 11
+   -0.0839,  0.0210,  0.1026,  0.1608,  0.1958,  0.2075,  0.1958, 
+    0.1608,  0.1026,  0.0210, -0.0839,  0,       0,       0, 
+    0,       0,       0,       0}, 
+  { 0,       0,       0,       0,       0,       0,      -0.0769,  // 13
+    0,       0.0629,  0.1119,  0.1469,  0.1678,  0.1748,  0.1678, 
+    0.1469,  0.1119, 0.0629,   0,      -0.0769,  0,       0,
+    0,       0,       0,       0},
+  { 0,       0,       0,       0,       0,      -0.0706, -0.0118,  // 15
+    0.0380,  0.0787,  0.1104,  0.1330,  0.1466,  0.1511,  0.1466, 
+    0.1330,  0.1104,  0.0787,  0.0380, -0.0118, -0.0706,  0, 
+    0,       0,       0,       0},
+  { 0,       0,       0,       0,      -0.0650, -0.0186,  0.0217,  // 17
+    0.0557,  0.0836,  0.1053,  0.1207,  0.1300,  0.1331,  0.1300, 
+    0.1207,  0.1053,  0.0836,  0.0557,  0.0217, -0.0186, -0.0650, 
+    0,       0,       0,       0},
+  { 0,       0,       0,       0,      -0.0827,  0.0106,  0.0394,  // 19
+    0.0637,  0.0836,  0.0991,  0.1101,  0.1168,  0.1190,  0.1168, 
+    0.1101,  0.0991,  0.0836,  0.0637,  0.0394,  0.0106, -0.0827, 
+    0,       0,       0,       0},
+  { 0,       0,       0,      -0.0807,  0.0029,  0.0275,  0.0487,  // 21
+    0.0667,  0.0814,  0.0928,  0.1010,  0.1059,  0.1076,  0.1059, 
+    0.1010,  0.0928,  0.0814,  0.0667,  0.0487,  0.0275,  0.0029, 
+   -0.0807,  0,       0,       0},      
+  { 0,      -0.0522, -0.0261, -0.0025,  0.0186,  0.0373,  0.0534,  // 23
+    0.0671,  0.0783,  0.0870,  0.0932,  0.0969,  0.0981,  0.0969, 
+    0.0932, 0.0870,   0.0783,  0.0671,  0.0534,  0.0373,  0.0186, 
+   -0.0025, -0.0261, -0.0522,  0},
+  {-0.0489, -0.0267, -0.0064,  0.0120,  0.0284,  0.0429,  0.0555,  // 25
+    0.0663,  0.0748,  0.0815,  0.0864,  0.0893,  0.0902,  0.0893,  
+    0.0864,  0.0815,  0.0748,  0.0663,  0.0555,  0.0429,  0.0284,  
+    0.0120, -0.0064, -0.0267, -0.0489}
 };
 
-
-LADSPA_Data *cnvl = matrix + HLF_CNVL;             // Center pointer
 
 
 /*****************************************************************************
@@ -103,30 +132,29 @@ void runSatana (LADSPA_Handle Instance,
                 unsigned long SampleCount) {
   
 
+  Satana       *psSatana;
   LADSPA_Data  *in;
   LADSPA_Data  *out;
   LADSPA_Data   select;
-  LADSPA_Data   sigma;
-  Satana       *psSatana;
+  unsigned long effic;
   unsigned long i;
   long          c;
   LADSPA_Data   sum;
+  LADSPA_Data  *cnvl;
 
   psSatana = (Satana *) Instance;
-  in  = psSatana->m_pfInputBuffer1;
-  out = psSatana->m_pfOutputBuffer1;
+
+  in     = psSatana->m_pfInputBuffer1;
+  out    = psSatana->m_pfOutputBuffer1;
   select = *(psSatana->m_pfControlValue1);
-  sigma  = *(psSatana->m_pfControlValue2);
-                                                   // Matrix is gaussian
-  for (c = -HLF_CNVL; c <= HLF_CNVL; c++) 
-    cnvl [c] = 17 * pow (M_E, -c * c / (2 * sigma * sigma)) / 
-                    (sigma * sqrt (2 * M_PI));
+  effic  = (LADSPA_Data)roundf (*(psSatana->m_pfControlValue2));
+  cnvl   = matrix [effic] + HLF_CNVL;
 
   for (i = HLF_CNVL; i < SampleCount-HLF_CNVL; i++) {
     sum = 0;
-    for (c = -HLF_CNVL ; c <= HLF_CNVL; c++)       // Convolve
+    for (c = -HLF_CNVL ; c <= HLF_CNVL; c++)
       sum += in [i+c] * cnvl [c];
-    out [i] = F (fabs (in [i])) * fabs (sum/LEN_CNVL) 
+    out [i] = F (fabs (in [i])) * fabs (sum) 
             + G (fabs (in [i])) * fabs (in [i]);
     if (in [i] < 0)
       out [i] = -out [i];
@@ -184,7 +212,7 @@ LADSPA_Descriptor * g_psSatanaDescr = NULL;
 /* _init() is called automatically when the plugin library is first
    loaded. */
 
-MACCONS void _init() {
+void _init() {
 
   char ** pcPortNames;
   LADSPA_PortDescriptor * piPortDescriptors;
@@ -224,7 +252,7 @@ MACCONS void _init() {
     pcPortNames [SATANA_INPUT]    = strdup ("Input");
     pcPortNames [SATANA_OUTPUT]   = strdup ("Output");
     pcPortNames [SATANA_CONTROL1] = strdup ("Selectivity");
-    pcPortNames [SATANA_CONTROL2] = strdup ("Filtering");
+    pcPortNames [SATANA_CONTROL2] = strdup ("Efficiency");
     pcPortNames [SATANA_CONTROL3] = strdup ("reserved");
 
     psPortRangeHints 
@@ -244,10 +272,9 @@ MACCONS void _init() {
 
     psPortRangeHints [SATANA_CONTROL2].HintDescriptor
       = (LADSPA_HINT_BOUNDED_BELOW 
-         | LADSPA_HINT_LOGARITHMIC
          | LADSPA_HINT_DEFAULT_MIDDLE);
     psPortRangeHints [SATANA_CONTROL2].LowerBound   = 0;
-    psPortRangeHints [SATANA_CONTROL2].UpperBound   = 10;
+    psPortRangeHints [SATANA_CONTROL2].UpperBound   = 11;
 
     psPortRangeHints [SATANA_CONTROL3].HintDescriptor
       = (LADSPA_HINT_BOUNDED_BELOW 
@@ -289,7 +316,7 @@ void deleteDescriptor (LADSPA_Descriptor * psDescriptor) {
 /*****************************************************************************/
 /* _fini() is called automatically when the library is unloaded. */
 
-MACDEST void _fini() {
+void _fini() {
 
   deleteDescriptor (g_psSatanaDescr);
 }
