@@ -3,30 +3,30 @@
 
 INCLUDES  = -I.
 LIBRARIES = -ldl -lm
-CFLAGS    = $(INCLUDES) -fno-common -Wall -Werror -g -O3 -fPIC
+CFLAGS    = $(INCLUDES) -fno-common -Wall -Werror -g -O3 -fPIC -c
 PLUGIN    = satana_4742
 CC        = /usr/bin/cc
-LD        = /usr/bin/ld
 MD        = /bin/mkdir -p
 INSTALL   = install -m 644
 
 SYSTEM    = $(shell uname)
 
 ifeq (${SYSTEM},Linux)
- LD = /usr/bin/ld -ldl -lm -g -shared
+ LD = /usr/bin/ld -g -shared 
  INSTALL_PLUGINS_DIR = /usr/lib/ladspa/
 else
-ifeq (${SYSTEM},Darwin)
- LD = ${CC} -flat_namespace -undefined suppress -bundle -lbundle1.o -lmx -lm
- INSTALL_PLUGINS_DIR = /Library/Audio/Plug-ins/LADSPA
-else
- LD = echo "NOT A SUPPORTED SYSTEM"
-endif
+ ifeq (${SYSTEM},Darwin)
+  CFLAGS += -arch i386 -arch ppc 
+  LD = ${CC} -flat_namespace -undefined suppress -bundle -lbundle1.o
+  INSTALL_PLUGINS_DIR = /Library/Audio/Plug-ins/LADSPA
+ else
+  LD = echo "NOT A SUPPORTED SYSTEM"
+ endif
 endif
 
 ${PLUGIN}.so: ${PLUGIN}.c
-	$(CC) $(CFLAGS) -o ${PLUGIN}.o -c ${PLUGIN}.c
-	$(LD) -o ${PLUGIN}.so ${PLUGIN}.o 
+	$(CC) $(CFLAGS) -o ${PLUGIN}.o ${PLUGIN}.c
+	$(LD) ${LIBRARIES} -o ${PLUGIN}.so ${PLUGIN}.o 
 
 ${INSTALL_PLUGINS_DIR}:
 	${MD} -p ${INSTALL_PLUGINS_DIR}
