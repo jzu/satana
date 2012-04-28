@@ -64,7 +64,7 @@ void _init(); // forward declaration
 // F(x) for filtered
 // G(x) for dry
 
-#define F(x) (pow (x, select))
+#define F(x) (pow (x, selec))
 #define G(x) (1 - F(x))
 
 
@@ -72,8 +72,7 @@ void _init(); // forward declaration
 // Savitzky-Golay filter coefficients
 // http://www.statistics4u.com/fundstat_eng/cc_filter_savgolay.html
 
-//LADSPA_Data matrix [HGH_CNVL][LEN_CNVL+1] = {
-LADSPA_Data matrix [11][26] = {
+LADSPA_Data matrix [HGH_CNVL][LEN_CNVL] = {
   { 0,       0,       0,       0,       0,       0,       0,       // 5
     0,       0,       0,      -0.0857,  0.3429,  0.4857,  0.3429, 
    -0.0857,  0,       0,       0,       0,       0,       0, 
@@ -124,8 +123,7 @@ LADSPA_Data matrix [11][26] = {
 
 /*****************************************************************************
  * Copy input to output while applying the progressive filter
- * (whose values are first computed as a gaussian)
- * Application function F(x) is #define'd as x^select
+ * Application function F(x) is #define'd as x^selec ; G(x) as 1 - x^selec
  *****************************************************************************/
 
 void runSatana (LADSPA_Handle Instance,
@@ -135,7 +133,7 @@ void runSatana (LADSPA_Handle Instance,
   Satana       *psSatana;
   LADSPA_Data  *in;
   LADSPA_Data  *out;
-  LADSPA_Data   select;
+  LADSPA_Data   selec;
   unsigned long effic;
   unsigned long i;
   long          c;
@@ -144,11 +142,11 @@ void runSatana (LADSPA_Handle Instance,
 
   psSatana = (Satana *) Instance;
 
-  in     = psSatana->m_pfInputBuffer1;
-  out    = psSatana->m_pfOutputBuffer1;
-  select = *(psSatana->m_pfControlValue1);
-  effic  = (LADSPA_Data)roundf (*(psSatana->m_pfControlValue2));
-  cnvl   = matrix [effic] + HLF_CNVL;
+  in    = psSatana->m_pfInputBuffer1;
+  out   = psSatana->m_pfOutputBuffer1;
+  selec = *(psSatana->m_pfControlValue1);
+  effic = lroundf (*(psSatana->m_pfControlValue2));
+  cnvl  = matrix [effic] + HLF_CNVL;
 
   for (i = HLF_CNVL; i < SampleCount-HLF_CNVL; i++) {
     sum = 0;
