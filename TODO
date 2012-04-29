@@ -1,3 +1,2 @@
 - Darwin port - compiles, links, but is not detected by Audacity
-- Add a volume compression like sin(x)
-- More aggro overall
+- Needs more tests

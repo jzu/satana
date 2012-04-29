@@ -20,20 +20,18 @@ function. Interestingly, additional high-order harmonics (unwanted
 low-intensity noise) are created while applying the low-pass filter - this
 behaviour may depend on matrix values.
 
-The first functional cursor, "Selectivity", controls the exponential function 
+The first cursor, _Precomp_, applies compression to the selection through a 
+recursive sine function. 0 does nothing, 5 is too much (you want to try that).
+
+The second control, _Selectivity_, controls the exponential function 
 parameter. `exp(0) = 1` means the signal is totally filtered, leading 
 to a severe loss of high frequencies, while `exp(10)` means only the very few 
 samples near 0dB are affected.
 
-The second one, "Efficiency", determines the number of Savitzky-Golay filter 
-coefficients which are used to smooth out the signal (0, 1... 10 -> 5, 7... 25).
+The third one, _Efficiency_, gives the number of Savitzky-Golay filter 
+coefficients which are used to smooth out the signal (5, 7, 9... 25). 14 is the 
+sam as 15.
 
-One supplementary control has been reserved, either for another matrix control,
-or for a compressor.
-
-This effect is not evil enough, yet. An additional function could be added to
-compress the signal, as well as a high-pass filter to slightly attenuate the
-low frequency boost it generates for low "Selectivity" values.
 
 Copyright (C) Jean Zundel <jzu@free.fr> 2012
 
@@ -57,7 +55,8 @@ Running
 
 Once the `satana_4742.so` library has been copied to `/usr/lib/ladspa/`, 
 enter Audacity and choose a victim^W track. Go to 
-*Effects > Modules... > Satana...*.
+*Effects > Modules... > Satana...*. You can begin by setting _Precomp_ to 1 
+or 2, _Selectivity_ to 5 and _Efficiency_ to 15, then experiment with
+other values.
 
-Done.
 
