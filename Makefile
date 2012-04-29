@@ -16,7 +16,7 @@ ifeq (${SYSTEM},Linux)
  INSTALL_PLUGINS_DIR = /usr/lib/ladspa/
 else
  ifeq (${SYSTEM},Darwin)
-  CFLAGS += -arch i386 -arch ppc 
+  CFLAGS += -arch i386
   LD = ${CC} -flat_namespace -undefined suppress -bundle -lbundle1.o
   INSTALL_PLUGINS_DIR = /Library/Audio/Plug-ins/LADSPA
  else
