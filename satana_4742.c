@@ -122,7 +122,8 @@ LADSPA_Data matrix [HGH_CNVL][LEN_CNVL] = {
 
 
 /*****************************************************************************
- * Copy input to output while applying the progressive filter
+ * Copy input to output while compressing then applying the progressive filter
+ * Precompression is time-independent ( sin(sin...(x)) )
  * Application function F(x) is #define'd as x^selec ; G(x) as 1 - x^selec
  *****************************************************************************/
 
@@ -135,6 +136,7 @@ void runSatana (LADSPA_Handle Instance,
   LADSPA_Data  *out;
   LADSPA_Data   selec;
   unsigned long effic;
+  unsigned long compr;
   unsigned long i;
   long          c;
   LADSPA_Data   sum;
@@ -144,11 +146,18 @@ void runSatana (LADSPA_Handle Instance,
 
   in    = psSatana->m_pfInputBuffer1;
   out   = psSatana->m_pfOutputBuffer1;
-  selec = *(psSatana->m_pfControlValue1);
-  effic = lroundf (*(psSatana->m_pfControlValue2));
+  compr = lroundf (*(psSatana->m_pfControlValue1));
+  selec = *(psSatana->m_pfControlValue2);
+  effic = lroundf (*(psSatana->m_pfControlValue3) / 2 - 3);
   cnvl  = matrix [effic] + HLF_CNVL;
 
-  for (i = HLF_CNVL; i < SampleCount-HLF_CNVL; i++) {
+printf ("[Satana] compr=%lu, selec=%f, effic=%lu\n", compr, selec, effic);
+
+  for (i = HLF_CNVL; i < SampleCount-HLF_CNVL; i++)       // Precompression
+    for (c = 0; c < compr; c++)
+      in [i] = sin (in [i] * M_PI_2);
+
+  for (i = HLF_CNVL; i < SampleCount-HLF_CNVL; i++) {     // Convolution
     sum = 0;
     for (c = -HLF_CNVL ; c <= HLF_CNVL; c++)
       sum += in [i+c] * cnvl [c];
@@ -249,9 +258,9 @@ __attribute__((constructor)) void _init() {
     g_psSatanaDescr->PortNames = (const char **) pcPortNames;
     pcPortNames [SATANA_INPUT]    = strdup ("Input");
     pcPortNames [SATANA_OUTPUT]   = strdup ("Output");
-    pcPortNames [SATANA_CONTROL1] = strdup ("Selectivity");
-    pcPortNames [SATANA_CONTROL2] = strdup ("Efficiency");
-    pcPortNames [SATANA_CONTROL3] = strdup ("reserved");
+    pcPortNames [SATANA_CONTROL1] = strdup ("Precomp\n(sin repetition)     ");
+    pcPortNames [SATANA_CONTROL2] = strdup ("Selectivity\n(all<->only a few)");
+    pcPortNames [SATANA_CONTROL3] = strdup ("Efficiency\n(5,7,9..25 coeffs) ");
 
     psPortRangeHints 
       = ((LADSPA_PortRangeHint *) calloc (5, sizeof (LADSPA_PortRangeHint)));
@@ -261,25 +270,29 @@ __attribute__((constructor)) void _init() {
     psPortRangeHints [SATANA_INPUT].HintDescriptor  = 0;
     psPortRangeHints [SATANA_OUTPUT].HintDescriptor = 0;
 
-    psPortRangeHints [SATANA_CONTROL1].HintDescriptor
-      = (LADSPA_HINT_BOUNDED_BELOW 
-         | LADSPA_HINT_LOGARITHMIC
-         | LADSPA_HINT_DEFAULT_MIDDLE);
+    psPortRangeHints [SATANA_CONTROL1].HintDescriptor      // Precomp
+      = (LADSPA_HINT_BOUNDED_BELOW
+         | LADSPA_HINT_BOUNDED_ABOVE
+         | LADSPA_HINT_INTEGER
+         | LADSPA_HINT_DEFAULT_0);
     psPortRangeHints [SATANA_CONTROL1].LowerBound   = 0;
-    psPortRangeHints [SATANA_CONTROL1].UpperBound   = 10;
+    psPortRangeHints [SATANA_CONTROL1].UpperBound   = 5;
 
-    psPortRangeHints [SATANA_CONTROL2].HintDescriptor
+    psPortRangeHints [SATANA_CONTROL2].HintDescriptor      // Selectivity
       = (LADSPA_HINT_BOUNDED_BELOW 
+         | LADSPA_HINT_BOUNDED_ABOVE
+         | LADSPA_HINT_LOGARITHMIC
          | LADSPA_HINT_DEFAULT_MIDDLE);
     psPortRangeHints [SATANA_CONTROL2].LowerBound   = 0;
-    psPortRangeHints [SATANA_CONTROL2].UpperBound   = 11;
+    psPortRangeHints [SATANA_CONTROL2].UpperBound   = 10;
 
-    psPortRangeHints [SATANA_CONTROL3].HintDescriptor
+    psPortRangeHints [SATANA_CONTROL3].HintDescriptor      // Efficiency
       = (LADSPA_HINT_BOUNDED_BELOW 
-         | LADSPA_HINT_LOGARITHMIC
+         | LADSPA_HINT_BOUNDED_ABOVE
+         | LADSPA_HINT_INTEGER
          | LADSPA_HINT_DEFAULT_MIDDLE);
-    psPortRangeHints [SATANA_CONTROL3].LowerBound   = 0;
-    psPortRangeHints [SATANA_CONTROL3].UpperBound   = 10;
+    psPortRangeHints [SATANA_CONTROL3].LowerBound   = 5;
+    psPortRangeHints [SATANA_CONTROL3].UpperBound   = 25;
 
     g_psSatanaDescr->instantiate  = instantiateSatana;
     g_psSatanaDescr->connect_port = connectPortToSatana;
