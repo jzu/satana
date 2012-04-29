@@ -9,7 +9,7 @@ saturation device, like a magnetic tape recorder whose VU meters are stuck
 in the red, or a tube amplifier's push-pull stage. In my opinion, it fails, but
 musicians may nonetheless find the resulting effect interesting.
 
-Directly derived from the [Despiker](https://github.com/jzu/despiker), it
+It begins with an optional pre-compressor, which does the evil part, then
 applies a convolution matrix acting as a low-pass filter to each signal point,
 with a twist: when the point is at the maximum (0 dB), the signal is totally
 filtered, while near zero, the dry signal stays almost untouched. The default
@@ -21,7 +21,7 @@ low-intensity noise) are created while applying the low-pass filter - this
 behaviour may depend on matrix values.
 
 The first cursor, _Precomp_, applies compression to the selection through a 
-recursive sine function. 0 does nothing, 5 is too much (you want to try that).
+recursive sine function. 0 does nothing, 5 is too much. I know you will try.
 
 The second control, _Selectivity_, controls the exponential function 
 parameter. `exp(0) = 1` means the signal is totally filtered, leading 
