@@ -29,8 +29,8 @@ to a severe loss of high frequencies, while `exp(10)` means only the very few
 samples near 0dB are affected.
 
 The third one, _Efficiency_, gives the number of Savitzky-Golay filter 
-coefficients which are used to smooth out the signal (5, 7, 9... 25). 14 is the 
-sam as 15.
+coefficients which are used to smooth out the signal: 5, 7, 9... 25 (14 is the 
+same as 15).
 
 
 Copyright (C) Jean Zundel <jzu@free.fr> 2012
@@ -57,6 +57,6 @@ Once the `satana_4742.so` library has been copied to `/usr/lib/ladspa/`,
 enter Audacity and choose a victim^W track. Go to 
 *Effects > Modules... > Satana...*. You can begin by setting _Precomp_ to 1 
 or 2, _Selectivity_ to 5 and _Efficiency_ to 15, then experiment with
-other values.
+other, bolder values.
 
 
