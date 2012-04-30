@@ -146,9 +146,9 @@ void runSatana (LADSPA_Handle Instance,
 
   in    = psSatana->m_pfInputBuffer1;
   out   = psSatana->m_pfOutputBuffer1;
-  compr = lroundf (*(psSatana->m_pfControlValue1));
+  compr = *(psSatana->m_pfControlValue1);
   selec = *(psSatana->m_pfControlValue2);
-  effic = lroundf (*(psSatana->m_pfControlValue3) / 2 - 3);
+  effic = *(psSatana->m_pfControlValue3) / 2 - 3;
   cnvl  = matrix [effic] + HLF_CNVL;
 
 printf ("[Satana] compr=%lu, selec=%f, effic=%lu\n", compr, selec, effic);
