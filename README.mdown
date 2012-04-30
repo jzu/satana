@@ -57,10 +57,16 @@ Type:
 
 That's about it. You can now use the plugin.
 
+A precompiled Darwin/MacOSX binary, built on 2012-04-19, is available at 
+[http://jzu.free.fr/Binaries/osx-satana\_4742.so](http://jzu.free.fr/Binaries/osx-satana\_4742.so) 
+for easy installation. It should be copied in 
+`/Library/Audio/Plug-ins/LADSPA` (system-wide install) or 
+`~/Library/Audio/Plug-ins/LADSPA` (user local install).
+
 Running
 -------
 
-Once the `satana_4742.so` library has been copied to `/usr/lib/ladspa/`, 
+Once the `satana_4742.so` library has been copied to `/usr/lib/ladspa/`,
 enter Audacity and choose a victim^W track. Go to 
 *Effects > Modules... > Satana...*. You can begin by setting _Precomp_ to 1 
 or 2, _Selectivity_ to 5 and _Efficiency_ to 15, then experiment with
