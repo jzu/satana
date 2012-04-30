@@ -10,15 +10,14 @@ in the red, or a tube amplifier's push-pull stage. In my opinion, it fails, but
 musicians may nonetheless find the resulting effect interesting.
 
 It begins with an optional pre-compressor, which does the evil part, then
-applies a convolution matrix acting as a low-pass filter to each signal point,
+applies a convolution matrix acting as a low-pass filter on each signal point,
 with a twist: when the point is at the maximum (0 dB), the signal is totally
 filtered, while near zero, the dry signal stays almost untouched. The default
 application function is non-linear (a power curve) in order to convolve mostly
 when approaching the maximum intensity; B&eacute;zier curves could do the job
 as well. The processing speed depends on the nature and the complexity of the
 function. Interestingly, additional high-order harmonics (unwanted
-low-intensity noise) are created while applying the low-pass filter - this
-behaviour may depend on matrix values.
+low-intensity noise) are created while applying the low-pass filter.
 
 The first cursor, _Precomp_, applies compression to the selection through a 
 recursive sine function. 0 does nothing; 5 is too much, generating a truckload
@@ -31,13 +30,13 @@ samples near 0dB are affected.
 
 The third one, _Efficiency_, gives the odd number of Savitzky-Golay filter 
 coefficients which are used to smooth out the signal: 5, 7, 9... 25 (here,
-12=13, 14=15, etc.) More coefficients used mean lower cutoff frequency. I
-don't know how to compute this frequency, if it is at all possible. On the
-other hand, this point is moot when filtering varies with the wavepoints'
-amplitude...
+12=13, 14=15, etc.) More coefficients give a lower cutoff frequency. I
+don't know how to compute this frequency, if it is at all possible... 
+The point is probably moot when filtering varies with the wavepoints'
+amplitude.
 
-The idea is to create harmonics by a time-independant compressor, then weed
-them out selectively, only in the higher parts of the signal, in order to
+To sum up, the idea is to create harmonics by a time-independent compressor, 
+then weed them out selectively in the higher parts of the signal in order to
 attenuate distortion harshness.
 
 Copyright (C) Jean Zundel <jzu@free.fr> 2012
@@ -66,10 +65,11 @@ for easy installation. It should be copied in
 Running
 -------
 
-Once the `satana_4742.so` library has been copied to `/usr/lib/ladspa/`,
+Once the `satana_4742.so` library has been copied to `/usr/lib/ladspa/` (or
+any other suitable installation folder),
 enter Audacity and choose a victim^W track. Go to 
-*Effects > Modules... > Satana...*. You can begin by setting _Precomp_ to 1 
-or 2, _Selectivity_ to 5 and _Efficiency_ to 15, then experiment with
+*Effects > Modules... > Satana...*. You can begin by setting _Precomp_ to  
+2, _Selectivity_ to 5 and _Efficiency_ to 15, then experiment with
 other, bolder values.
 
 
