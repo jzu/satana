@@ -17,7 +17,7 @@ ifeq (${SYSTEM},Linux)
 else
  ifeq (${SYSTEM},Darwin)
   CFLAGS += -arch i386
-  LD = ${CC} -flat_namespace -undefined suppress -bundle -lbundle1.o
+  LD = ${CC} -arch i386 -flat_namespace -undefined suppress -bundle -lbundle1.o
   INSTALL_PLUGINS_DIR = /Library/Audio/Plug-ins/LADSPA
  else
   LD = echo "NOT A SUPPORTED SYSTEM"
