@@ -41,6 +41,7 @@ typedef struct {
 #define SATANA_CONTROL2 3
 #define SATANA_CONTROL3 4
 
+#define DEBUG if (debug) printf
 
 // Yeuch
 
@@ -130,20 +131,22 @@ LADSPA_Data matrix [HGH_CNVL][LEN_CNVL] = {
 void runSatana (LADSPA_Handle Instance,
                 unsigned long SampleCount) {
   
-
   Satana       *psSatana;
   LADSPA_Data  *in;
   LADSPA_Data  *out;
+
   LADSPA_Data   selec;
   unsigned long effic;
   unsigned long compr;
+
+  LADSPA_Data  *cnvl;
+  LADSPA_Data   sum;
   unsigned long i;
   long          c;
-  LADSPA_Data   sum;
-  LADSPA_Data  *cnvl;
+  int           debug = 0;
+
 
   psSatana = (Satana *) Instance;
-
   in    = psSatana->m_pfInputBuffer1;
   out   = psSatana->m_pfOutputBuffer1;
   compr = *(psSatana->m_pfControlValue1);
@@ -151,7 +154,7 @@ void runSatana (LADSPA_Handle Instance,
   effic = *(psSatana->m_pfControlValue3) / 2 - 3;
   cnvl  = matrix [effic] + HLF_CNVL;
 
-printf ("[Satana] compr=%lu, selec=%f, effic=%lu\n", compr, selec, effic);
+DEBUG ("[Satana] compr=%lu, selec=%f, effic=%lu\n", compr, selec, effic);
 
   for (i = HLF_CNVL; i < SampleCount-HLF_CNVL; i++)       // Precompression
     for (c = 0; c < compr; c++)
@@ -274,7 +277,7 @@ __attribute__((constructor)) void _init() {
       = (LADSPA_HINT_BOUNDED_BELOW
          | LADSPA_HINT_BOUNDED_ABOVE
          | LADSPA_HINT_INTEGER
-         | LADSPA_HINT_DEFAULT_0);
+         | LADSPA_HINT_DEFAULT_1);
     psPortRangeHints [SATANA_CONTROL1].LowerBound   = 0;
     psPortRangeHints [SATANA_CONTROL1].UpperBound   = 5;
 
