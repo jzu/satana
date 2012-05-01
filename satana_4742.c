@@ -147,7 +147,7 @@ void runSatana (LADSPA_Handle Instance,
   LADSPA_Data   sum;
   unsigned long i;
   long          c;
-  int           debug = 1;
+  int           debug = 0;
 
 
   psSatana = (Satana *) Instance;
@@ -163,18 +163,19 @@ DEBUG ("[Satana] compr=%lu, selec=%1.2f, effic=%lu, gain=%1.2f\n",
        compr, selec, effic, gain);
 
   for (i = HLF_CNVL; i < SampleCount-HLF_CNVL; i++) {
-    if (in [i] > 0)                                       // Clipping
-      in [i] = sin (sin (in [i] * M_PI_2) * M_PI_2)       // soft
-             / (compr+1);
+    if (in [i] > 0)                                           // Clipping
+      in [i] = (sin (sin (in [i] * M_PI_2) * M_PI_2) * compr  // soft
+                + in [i] * (5 - compr)
+               ) / 5 ;
     else
-      if (in [i] < -.7)
-        in [i] = -.7;                                     // hard
+      if (in [i] < -1 + (float)compr / 10)
+        in [i] = -1 + (float)compr / 10;                      // hard
 
-    for (c = 0; c < compr; c++)                           // Compression
+    for (c = 0; c < compr; c++)                               // Compression
       in [i] = sin (in [i] * M_PI_2);
 
     sum = 0;
-    for (c = -HLF_CNVL ; c <= HLF_CNVL; c++)              // Convolution
+    for (c = -HLF_CNVL ; c <= HLF_CNVL; c++)                  // Convolution
       sum += in [i+c] * cnvl [c];
     out [i] = (F (fabs (in [i])) * fabs (sum) +
                G (fabs (in [i])) * fabs (in [i])) * gain;
