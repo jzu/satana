@@ -9,35 +9,43 @@ saturation device, like a magnetic tape recorder whose VU meters are stuck
 in the red, or a tube amplifier's push-pull stage. In my opinion, it fails, but
 musicians may nonetheless find the resulting effect interesting.
 
-It begins with an optional pre-compressor, which does the evil part, then
-applies a convolution matrix acting as a low-pass filter on each signal point,
-with a twist: when the point is at the maximum (0 dB), the signal is totally
-filtered, while near zero, the dry signal stays almost untouched. The default
-application function is non-linear (a power curve) in order to convolve mostly
-when approaching the maximum intensity; B&eacute;zier curves could do the job
-as well. The processing speed depends on the nature and the complexity of the
-function. Interestingly, additional high-order harmonics (unwanted
-low-intensity noise) are created while applying the low-pass filter.
+It begins with triode clipping for even harmonics and an optional compressor
+for odd harmonics, which do the evil part, then applies a convolution matrix
+acting as a low-pass filter on each signal point, with a twist: when the point
+is at the maximum (0 dB), the signal is totally filtered, while near zero, the
+dry signal stays almost untouched. The default application function is
+non-linear (a power curve) in order to convolve mostly when approaching the
+maximum intensity; B&eacute;zier curves could do the job as well. The
+processing speed depends on the nature and the complexity of the function.
+Interestingly, additional high-order harmonics (unwanted low-intensity noise)
+are created while applying the low-pass filter.
 
-The first cursor, _Precomp_, applies compression to the selection through a 
+The first control, _Triode clipping_, emulates a typical triode like a
+12AX7, where one half-wave is simply truncated and the other half-wave is 
+rounded. The default value, 1, induces no clipping. This feature is 
+experimental and the way it works will quickly change.
+
+The second one, _Compression_, applies compression to the selection through a 
 recursive sine function. 0 does nothing; 5 is too much, generating a truckload
 of harmonics and distortion. I know you will try.
 
-The second control, _Selectivity_, controls the exponential function 
+The third cursor, _Selectivity_, controls the exponential function 
 parameter. `exp(0) = 1` means the signal is totally filtered, leading 
 to a severe loss of high frequencies, while `exp(10)` means only the very few 
 samples near 0dB are affected.
 
-The third one, _Efficiency_, gives the odd number of Savitzky-Golay filter 
+The fourth one, _Efficiency_, gives the odd number of Savitzky-Golay filter 
 coefficients which are used to smooth out the signal: 5, 7, 9... 25 (here,
 12=13, 14=15, etc.) More coefficients give a lower cutoff frequency. I
 don't know how to compute this frequency, if it is at all possible... 
 The point is probably moot when filtering varies with the wavepoints'
 amplitude.
 
-To sum up, the idea is to create harmonics by a time-independent compressor, 
-then weed them out selectively in the higher parts of the signal in order to
-attenuate distortion harshness.
+The last one, _Volume_, is used to reduce the gain when it gets massive.
+
+To sum up, the idea is to create a lot of odd and even harmonics, then weed
+them out selectively in the higher parts of the signal in order to attenuate
+distortion harshness.
 
 Copyright (C) Jean Zundel <jzu@free.fr> 2012
 
