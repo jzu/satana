@@ -20,7 +20,7 @@ function.  Interestingly, additional high-order harmonics (unwanted
 low-intensity noise) are created while applying the low-pass filter.
 
 The first control, _Compression_, applies compression to the selection through
-a recursive sine function, a little bit of asymmetric clipping being added to 
+a recursive sine function, a bit of asymmetric clipping being added to 
 make things interesting. 0 does nothing; 5 is too much, generating a truckload
 of harmonics and distortion. I know you will try.
 
