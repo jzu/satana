@@ -75,4 +75,9 @@ enter Audacity and choose a victim^W track. Go to
 2, _Selectivity_ to 5 and _Efficiency_ to 15, then experiment with
 other, bolder values.
 
+This plugin serves several purposes. You can use it to soften a
+digitally-clipped track (_Compression_ to 0, _Selectivity_ and _Efficiency_ at
+mid-course); you can "enhance" the sound with compression; you can also
+massively distort it (set _Compression_ to 4 or 5, a low value for
+_Selectivity_, and _Efficiency_ above 15).
 
