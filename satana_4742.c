@@ -131,8 +131,12 @@ LADSPA_Data matrix [HGH_CNVL][LEN_CNVL] = {
 
 /*****************************************************************************
  * Copy input to output while compressing then applying the progressive filter
- * Precompression is time-independent ( sin(sin...(x)) )
- * Application function F(x) is #define'd as x^selec ; G(x) as 1 - x^selec
+ * Compression is time-independent ( sin(sin...(x)) ) and gives odd harmonics
+ * Asymmetric clipping is modeled on a typical triode, where one half of the
+ * signal is continuously rounded and the other one is cropped at a certain
+ * level, giving mostly even harmonics
+ * Filtering application function F(x) is #define'd as x^selec 
+ * Complementary application function of dry signal G(x) is 1 - x^selec 
  *****************************************************************************/
 
 void runSatana (LADSPA_Handle Instance,
@@ -152,7 +156,7 @@ void runSatana (LADSPA_Handle Instance,
   LADSPA_Data   sum;
   unsigned long i;
   long          c;
-  int           debug = 1;
+  int           debug = 0;
 
 
   psSatana = (Satana *) Instance;
@@ -164,7 +168,7 @@ void runSatana (LADSPA_Handle Instance,
   gain  = *(psSatana->m_pfControlValue4);
 
   cnvl  = matrix [effic] + HLF_CNVL;
-  clip  = (LADSPA_Data)compr / 5;
+  clip  = (LADSPA_Data)compr / 5;                             // Mix dry/clip
 
   DEBUG ("[Satana] compr=%lu, selec=%1.2f, effic=%lu, gain=%1.2f\n", 
          compr, selec, effic, gain);
@@ -328,7 +332,7 @@ __attribute__((constructor)) void _init() {
       = (LADSPA_HINT_BOUNDED_BELOW 
          | LADSPA_HINT_BOUNDED_ABOVE
          | LADSPA_HINT_LOGARITHMIC
-         | LADSPA_HINT_DEFAULT_MIDDLE);
+         | LADSPA_HINT_DEFAULT_1);
     psPortRangeHints [SATANA_CONTROL4].LowerBound   = 0;
     psPortRangeHints [SATANA_CONTROL4].UpperBound   = 1;
 
