@@ -308,7 +308,7 @@ __attribute__((constructor)) void _init() {
       = (LADSPA_HINT_BOUNDED_BELOW
          | LADSPA_HINT_BOUNDED_ABOVE
          | LADSPA_HINT_INTEGER
-         | LADSPA_HINT_DEFAULT_1);
+         | LADSPA_HINT_DEFAULT_0);
     psPortRangeHints [SATANA_CONTROL1].LowerBound   = 0;
     psPortRangeHints [SATANA_CONTROL1].UpperBound   = 5;
 
