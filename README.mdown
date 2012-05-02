@@ -20,7 +20,7 @@ function.  Interestingly, additional high-order harmonics (unwanted
 low-intensity noise) are created while applying the low-pass filter.
 
 The first control, _Compression_, applies compression to the selection through
-a recursive sine function, a bit of asymmetric clipping being added to 
+a recursive sine function, a little bit of asymmetric clipping being added to 
 make things interesting. 0 does nothing; 5 is too much, generating a truckload
 of harmonics and distortion. I know you will try.
 
@@ -59,7 +59,7 @@ Type:
 
 That's about it. You can now use the plugin.
 
-A precompiled Darwin/MacOSX binary, built on 2012-04-19, is available at 
+A precompiled Darwin/MacOSX binary, built on 2012-04-29, is available at 
 [http://jzu.free.fr/Binaries/osx-satana\_4742.so](http://jzu.free.fr/Binaries/osx-satana\_4742.so) 
 for easy installation. It should be copied in 
 `/Library/Audio/Plug-ins/LADSPA` (system-wide install) or 
