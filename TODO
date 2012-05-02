@@ -1,3 +1,4 @@
+- Doesn't work with Ardour
 - Normalize somewhat
 - Auto high-pass filter after compression
 - More tests
