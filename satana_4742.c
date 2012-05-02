@@ -71,6 +71,10 @@ void _init(); // forward declaration
 #define F(x) (pow (x, selec))
 #define G(x) (1 - F(x))
 
+// Function for soft half clipping
+
+#define H(x) sin (sin (x * M_PI_2) * M_PI_2) / (1 + clip)
+
 
 // Convolution vectors
 // Savitzky-Golay filter coefficients
@@ -144,10 +148,11 @@ void runSatana (LADSPA_Handle Instance,
   LADSPA_Data   gain;
 
   LADSPA_Data  *cnvl;
+  LADSPA_Data   clip;
   LADSPA_Data   sum;
   unsigned long i;
   long          c;
-  int           debug = 0;
+  int           debug = 1;
 
 
   psSatana = (Satana *) Instance;
@@ -157,23 +162,26 @@ void runSatana (LADSPA_Handle Instance,
   selec = *(psSatana->m_pfControlValue2);
   effic = *(psSatana->m_pfControlValue3) / 2 - 3;
   gain  = *(psSatana->m_pfControlValue4);
-  cnvl  = matrix [effic] + HLF_CNVL;
 
-DEBUG ("[Satana] compr=%lu, selec=%1.2f, effic=%lu, gain=%1.2f\n", 
-       compr, selec, effic, gain);
+  cnvl  = matrix [effic] + HLF_CNVL;
+  clip  = (LADSPA_Data)compr / 5;
+
+  DEBUG ("[Satana] compr=%lu, selec=%1.2f, effic=%lu, gain=%1.2f\n", 
+         compr, selec, effic, gain);
 
   for (i = HLF_CNVL; i < SampleCount-HLF_CNVL; i++) {
     if (in [i] > 0)                                           // Clipping
-      in [i] = (sin (sin (in [i] * M_PI_2) * M_PI_2) * compr  // soft
-                + in [i] * (5 - compr)
-               ) / 5 ;
+      in [i] = H (in [i]) * clip 
+             + in [i] * (1 - clip);                           // soft half
     else
-      if (in [i] < -1 + (float)compr / 10)
-        in [i] = -1 + (float)compr / 10;                      // hard
+      if (in [i] < -(1 - clip / 2))
+        in [i] = -(1 - clip / 2);                             // hard half
 
     for (c = 0; c < compr; c++)                               // Compression
       in [i] = sin (in [i] * M_PI_2);
+  }
 
+  for (i = HLF_CNVL; i < SampleCount-HLF_CNVL; i++) {
     sum = 0;
     for (c = -HLF_CNVL ; c <= HLF_CNVL; c++)                  // Convolution
       sum += in [i+c] * cnvl [c];
