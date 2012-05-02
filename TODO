@@ -1,2 +1,3 @@
 - Normalize somewhat
+- Auto high-pass filter after compression
 - More tests
