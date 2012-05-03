@@ -75,6 +75,10 @@ void _init(); // forward declaration
 
 #define H(x) sin (sin (x * M_PI_2) * M_PI_2) / (1 + clip)
 
+// http://ardour.org/node/139
+
+#define IS_ALMOST_DENORMAL(f) (fabs(f) < 3.e-34)
+
 
 // Convolution vectors
 // Savitzky-Golay filter coefficients
@@ -137,6 +141,8 @@ LADSPA_Data matrix [HGH_CNVL][LEN_CNVL] = {
  * level, giving mostly even harmonics
  * Filtering application function F(x) is #define'd as x^selec 
  * Complementary application function of dry signal G(x) is 1 - x^selec 
+ * IS_ALMOST_DENORMAL: http://ardour.org/node/139 
+ *                     https://github.com/gordonjcp/lysdr/blob/master/filter.c
  *****************************************************************************/
 
 void runSatana (LADSPA_Handle Instance,
@@ -191,6 +197,10 @@ void runSatana (LADSPA_Handle Instance,
       sum += in [i+c] * cnvl [c];
     out [i] = (F (fabs (in [i])) * fabs (sum) +
                G (fabs (in [i])) * fabs (in [i])) * gain;
+
+    if (IS_ALMOST_DENORMAL (out [i]))
+      out [i] = 0;
+
     if (in [i] < 0)
       out [i] = -out [i];
   }
