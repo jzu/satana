@@ -1,4 +1,3 @@
-- Doesn't work with Ardour : implement DAZ (http://ardour.org/node/139)
-- Normalize somewhat
-- Auto high-pass filter after compression
+- Should work with Ardour
+- Auto bandpass filter after compression
 - More tests
