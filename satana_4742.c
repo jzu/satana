@@ -250,7 +250,7 @@ LADSPA_Descriptor * g_psSatanaDescr = NULL;
 /* _init() is called automatically when the plugin library is first
    loaded. */
 
-__attribute__((constructor)) void _init() {
+void _init() {
 
   char ** pcPortNames;
   LADSPA_PortDescriptor * piPortDescriptors;
@@ -369,7 +369,7 @@ void deleteDescriptor (LADSPA_Descriptor * psDescriptor) {
 /*****************************************************************************/
 /* _fini() is called automatically when the library is unloaded. */
 
-__attribute__((destructor)) void _fini() {
+void _fini() {
 
   deleteDescriptor (g_psSatanaDescr);
 }
