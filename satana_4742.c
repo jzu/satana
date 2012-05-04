@@ -68,7 +68,7 @@ void _init(); // forward declaration
 // F(x) for filtered
 // G(x) for dry
 
-#define F(x) (pow (x, selec))
+#define F(x) (power (x, selec))   /* Optimized pow() simulation */
 #define G(x) (1 - F(x))
 
 // Function for soft half clipping
@@ -132,6 +132,24 @@ LADSPA_Data matrix [HGH_CNVL][LEN_CNVL] = {
 };
 
 
+/*****************************************************************************
+ * pow() simulation, which is easy since the exponent part is integer, and  
+ * both exponent and base are positive - huge performance improvement
+ * IS_ALMOST_DENORMAL: http://ardour.org/node/139 
+ *                     https://github.com/gordonjcp/lysdr/blob/master/filter.c
+ *****************************************************************************/
+
+float power (float b, float e) {
+
+  int   i;
+  float p = 1;
+
+  for (i = 1; i < e; i++) 
+    p *= b;
+  if (IS_ALMOST_DENORMAL (p))
+    p = 0;   
+  return p;
+}
 
 /*****************************************************************************
  * Copy input to output while compressing then applying the progressive filter
@@ -141,8 +159,6 @@ LADSPA_Data matrix [HGH_CNVL][LEN_CNVL] = {
  * level, giving mostly even harmonics
  * Filtering application function F(x) is #define'd as x^selec 
  * Complementary application function of dry signal G(x) is 1 - x^selec 
- * IS_ALMOST_DENORMAL: http://ardour.org/node/139 
- *                     https://github.com/gordonjcp/lysdr/blob/master/filter.c
  *****************************************************************************/
 
 void runSatana (LADSPA_Handle Instance,
@@ -160,6 +176,7 @@ void runSatana (LADSPA_Handle Instance,
   LADSPA_Data  *cnvl;
   LADSPA_Data   clip;
   LADSPA_Data   sum;
+  LADSPA_Data   sign;
   unsigned long i;
   long          c;
   int           debug = 0;
@@ -179,11 +196,6 @@ void runSatana (LADSPA_Handle Instance,
   DEBUG ("[Satana] compr=%lu, selec=%1.2f, effic=%lu, gain=%1.2f\n", 
          compr, selec, effic, gain);
 
-  for (i = 0; i < HLF_CNVL; i++ ) {                           // Lacking data:
-    out [i] = in [i];                                         // do nothing
-    out [SampleCount-i-1] = in [SampleCount-i-1];
-  }
-
   for (i = HLF_CNVL; i < SampleCount-HLF_CNVL; i++) {
     if (in [i] > 0)                                           // Clipping
       in [i] = H (in [i]) * clip 
@@ -198,16 +210,11 @@ void runSatana (LADSPA_Handle Instance,
 
   for (i = HLF_CNVL; i < SampleCount-HLF_CNVL; i++) {
     sum = 0;
+    sign = (in [i] < 0) ? -1.0 : 1.0;
     for (c = -HLF_CNVL ; c <= HLF_CNVL; c++)                  // Convolution
       sum += in [i+c] * cnvl [c];
-    out [i] = (F (fabs (in [i])) * fabs (sum) +
-               G (fabs (in [i])) * fabs (in [i])) * gain;
-
-    if (IS_ALMOST_DENORMAL (out [i]))
-      out [i] = 0;
-
-    if (in [i] < 0)
-      out [i] = -out [i];
+    out [i]= (F (fabs (in [i])) * fabs (sum) +
+              G (fabs (in [i])) * fabs (in [i])) * gain * sign;
   }
 }
 
@@ -325,7 +332,7 @@ void _init() {
          | LADSPA_HINT_INTEGER
          | LADSPA_HINT_DEFAULT_0);
     psPortRangeHints [SATANA_CONTROL1].LowerBound   = 0;
-    psPortRangeHints [SATANA_CONTROL1].UpperBound   = 5;
+    psPortRangeHints [SATANA_CONTROL1].UpperBound   = 10;
 
     psPortRangeHints [SATANA_CONTROL2].HintDescriptor      // Selectivity
       = (LADSPA_HINT_BOUNDED_BELOW 
@@ -340,7 +347,7 @@ void _init() {
          | LADSPA_HINT_INTEGER
          | LADSPA_HINT_DEFAULT_MIDDLE);
     psPortRangeHints [SATANA_CONTROL3].LowerBound   = 5;
-    psPortRangeHints [SATANA_CONTROL3].UpperBound   = 25;
+    psPortRangeHints [SATANA_CONTROL3].UpperBound   = LEN_CNVL;
 
     psPortRangeHints [SATANA_CONTROL4].HintDescriptor      // Volume
       = (LADSPA_HINT_BOUNDED_BELOW 
