@@ -6,7 +6,8 @@ Version 0.666
 Satana (Saturation Analogique) is a [LADSPA plugin](http://www.ladspa.org/) 
 which can be used with any compatible host, such as 
 [Audacity](http://audacity.sourceforge.net/),
-[MPlayer](http://www.mplayerhq.hu/), or ([Ardour](http://ardour.org/).
+[MPlayer](http://www.mplayerhq.hu/), or
+[Ardour](http://ardour.org/)([¹](#Bugs)).
 It tries hard to simulate an analogue saturation device, like a magnetic tape
 recorder whose VU meters are stuck in the red, or a tube amplifier's push-pull
 stage. In my opinion, it fails, but musicians may nonetheless find the
@@ -17,27 +18,26 @@ convolution matrix acting as a low-pass filter on each signal point, with a
 twist: when the point is at the maximum (0 dB), the signal is totally filtered,
 while near zero, the dry signal stays almost untouched. The default application
 function is non-linear (a power curve) in order to convolve mostly when
-approaching the maximum intensity; B&eacute;zier curves could do the job as
-well. The processing speed depends on the nature and the complexity of the
-function.  Interestingly, additional high-order harmonics (unwanted
-low-intensity noise) are created while applying the low-pass filter.
+approaching the maximum intensity. The processing speed depends on the nature
+and the complexity of the function. Interestingly, additional high-order
+harmonics (unwanted low-intensity noise) are created while applying the
+low-pass filter.
 
 The first control, _Compression_, applies compression to the selection through
 a recursive sine function, a bit of asymmetric clipping being added to 
 make things interesting. 0 does nothing; 10 is too much, generating a truckload
 of harmonics and distortion. I know you will try.
 
-The second cursor, _Selectivity_, controls the exponential function 
+The second one, _Selectivity_, controls the exponential function 
 parameter. `exp(0) = 1` means the signal is totally filtered, leading 
 to a severe loss of high frequencies, while `exp(10)` means only the very few 
-samples near 0dB are affected.
+samples near 0dB are affected. For values above 2, this effect is rather 
+subtle.
 
-The third one, _Efficiency_, gives the odd number of Savitzky-Golay filter 
+The third slider, _Efficiency_, gives the odd number of Savitzky-Golay filter 
 coefficients which are used to smooth out the signal: 5, 7, 9... 25 (here,
-12=13, 14=15, etc.) More coefficients give a lower cutoff frequency. I
-don't know how to compute this frequency, if it is at all possible... 
-The point is probably moot when filtering varies with the wavepoints'
-amplitude.
+12=13, 14=15, etc.) More coefficients give a lower cutoff frequency, if
+there is such a thing when filtering varies with the wavepoints' amplitude.
 
 The last one, _Volume_, is used to reduce the gain when it gets massive.
 
@@ -86,7 +86,7 @@ _Selectivity_, and _Efficiency_ above 15).
 
 Bugs
 ----
-
+(¹)
 Not too perfect with Ardour yet, but usable. One can hear constant intensity 
 crackles when _Volume_ is down, like a kind of echo to the original signal.
-
+Doesn't happen with other sofware.
