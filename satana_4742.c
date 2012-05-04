@@ -179,6 +179,11 @@ void runSatana (LADSPA_Handle Instance,
   DEBUG ("[Satana] compr=%lu, selec=%1.2f, effic=%lu, gain=%1.2f\n", 
          compr, selec, effic, gain);
 
+  for (i = 0; i < HLF_CNVL; i++ ) {                           // Lacking data:
+    out [i] = in [i];                                         // do nothing
+    out [SampleCount-i-1] = in [SampleCount-i-1];
+  }
+
   for (i = HLF_CNVL; i < SampleCount-HLF_CNVL; i++) {
     if (in [i] > 0)                                           // Clipping
       in [i] = H (in [i]) * clip 
@@ -325,7 +330,6 @@ void _init() {
     psPortRangeHints [SATANA_CONTROL2].HintDescriptor      // Selectivity
       = (LADSPA_HINT_BOUNDED_BELOW 
          | LADSPA_HINT_BOUNDED_ABOVE
-         | LADSPA_HINT_LOGARITHMIC
          | LADSPA_HINT_DEFAULT_MIDDLE);
     psPortRangeHints [SATANA_CONTROL2].LowerBound   = 0;
     psPortRangeHints [SATANA_CONTROL2].UpperBound   = 10;
