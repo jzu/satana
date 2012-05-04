@@ -63,7 +63,7 @@ Type:
 
 That's about it. You can now use the plugin.
 
-A precompiled Darwin/MacOSX binary, built on 2012-04-29, is available at 
+A precompiled Darwin/MacOSX binary, built on 2012-05-02, is available at 
 [http://jzu.free.fr/Binaries/osx-satana\_4742.so](http://jzu.free.fr/Binaries/osx-satana\_4742.so) 
 for easy installation. It should be copied in 
 `/Library/Audio/Plug-ins/LADSPA` (system-wide install) or 
