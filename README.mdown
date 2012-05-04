@@ -3,8 +3,11 @@ Satana
 
 Version 0.666
 
-Satana (Saturation Analogique) is a LADSPA plugin which can be used with any
-compatible host, such as Audacity or mplayer (not Ardour, though, see below).
+Satana (Saturation Analogique) is a [LADSPA plugin](http://www.ladspa.org/) 
+which can be used with any compatible host, such as 
+[Audacity](http://audacity.sourceforge.net/) or 
+[MPlayer](http://www.mplayerhq.hu/) (not [Ardour](http://ardour.org/), though,
+see below).
 It tries hard to simulate an analogue saturation device, like a magnetic tape
 recorder whose VU meters are stuck in the red, or a tube amplifier's push-pull
 stage. In my opinion, it fails, but musicians may nonetheless find the
