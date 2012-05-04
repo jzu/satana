@@ -1,3 +1,4 @@
-- Should work with Ardour
+- Should work better with Ardour
 - Auto bandpass filter after compression
 - More tests
+- Even more distortion
