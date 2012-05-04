@@ -7,7 +7,7 @@ Satana (Saturation Analogique) is a [LADSPA plugin](http://www.ladspa.org/)
 which can be used with any compatible host, such as 
 [Audacity](http://audacity.sourceforge.net/),
 [MPlayer](http://www.mplayerhq.hu/), or
-[Ardour](http://ardour.org/)([¹](#Bugs)).
+[Ardour](http://ardour.org/)([¹](#bugs)).
 It tries hard to simulate an analogue saturation device, like a magnetic tape
 recorder whose VU meters are stuck in the red, or a tube amplifier's push-pull
 stage. In my opinion, it fails, but musicians may nonetheless find the
@@ -17,22 +17,21 @@ It begins with an optional compressor, which does the evil part, then applies a
 convolution matrix acting as a low-pass filter on each signal point, with a
 twist: when the point is at the maximum (0 dB), the signal is totally filtered,
 while near zero, the dry signal stays almost untouched. The default application
-function is non-linear (a power curve) in order to convolve mostly when
+function is non-linear (a power of x curve) in order to convolve mostly when
 approaching the maximum intensity. The processing speed depends on the nature
 and the complexity of the function. Interestingly, additional high-order
 harmonics (unwanted low-intensity noise) are created while applying the
 low-pass filter.
 
-The first control, _Compression_, applies compression to the selection through
-a recursive sine function, a bit of asymmetric clipping being added to 
-make things interesting. 0 does nothing; 10 is too much, generating a truckload
-of harmonics and distortion. I know you will try.
+The first control, _Compression_, applies this effect to the selection through 
+a recursive sine function, a bit of asymmetric clipping being added to make
+things interesting. 0 does nothing; 5 is too much, generating a truckload of
+harmonics and distortion. I know you will try.
 
-The second one, _Selectivity_, controls the exponential function 
-parameter. `exp(0) = 1` means the signal is totally filtered, leading 
-to a severe loss of high frequencies, while `exp(10)` means only the very few 
-samples near 0dB are affected. For values above 2, this effect is rather 
-subtle.
+The second one, _Selectivity_, controls the exponential function parameter.
+`exp(0) = 1` means the signal is totally filtered, leading to a severe loss of
+high frequencies, while `exp(10)` means only the very few samples near 0dB are
+affected. For values above 2, this effect is rather subtle.
 
 The third slider, _Efficiency_, gives the odd number of Savitzky-Golay filter 
 coefficients which are used to smooth out the signal: 5, 7, 9... 25 (here,
@@ -81,12 +80,12 @@ other, bolder values.
 This plugin serves several purposes. You can use it to soften a
 digitally-clipped track (_Compression_ to 0, _Selectivity_ and _Efficiency_ at
 mid-course); you can "enhance" the sound with compression; you can also
-massively distort it (set _Compression_ to 10, a low value for
-_Selectivity_, and _Efficiency_ above 15).
+massively distort it (set _Compression_ to 10 and, for what it's worth, a low 
+value for _Selectivity_, and _Efficiency_ above 15).
 
 Bugs
 ----
-(¹)
-Not too perfect with Ardour yet, but usable. One can hear constant intensity 
-crackles when _Volume_ is down, like a kind of echo to the original signal.
-Doesn't happen with other sofware.
+
+(¹) Not too perfect with Ardour yet, but getting usable. One can hear constant
+intensity crackles when _Volume_ is down, like a kind of echo to the original
+signal.  Doesn't happen with other sofware.
