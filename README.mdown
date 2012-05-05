@@ -38,6 +38,8 @@ The third one, _Efficiency_, gives the (always odd) number of filter
 coefficients which are used to smooth out the signal: 5, 7, 9... 25 (here,
 12=13, 14=15, etc.) More coefficients give a lower cutoff frequency, if
 there is such a thing when filtering varies with the wavepoints' amplitude.
+This control, along with the second one, give usually a subtle result - as it 
+should.
 
 The last one, _Volume_, is used to reduce the gain when it gets massive.
 
