@@ -63,21 +63,21 @@ void _init(); // forward declaration
 #define HLF_CNVL  12
 #define LEN_CNVL  (2*HLF_CNVL+1)
 
+// http://ardour.org/node/139
+
+#define IS_ALMOST_DENORMAL(f) (fabs(f) < 3.e-34)
 
 // Functions applying/mixing the convolution
 // F(x) for filtered
 // G(x) for dry
 
-#define F(x) (power (x, selec))   /* Optimized pow() simulation */
+//#define F(x) (power (x, selec))   /* Optimized pow() simulation */
+#define F(x) (pow (x, selec)) 
 #define G(x) (1 - F(x))
 
 // Function for soft half clipping
 
 #define H(x) sin (sin (x * M_PI_2) * M_PI_2) / (1 + clip)
-
-// http://ardour.org/node/139
-
-#define IS_ALMOST_DENORMAL(f) (fabs(f) < 3.e-34)
 
 
 // Convolution vectors
@@ -131,25 +131,6 @@ LADSPA_Data matrix [HGH_CNVL][LEN_CNVL] = {
     0.0120, -0.0064, -0.0267, -0.0489}
 };
 
-
-/*****************************************************************************
- * pow() simulation, which is easy since the exponent part is integer, and  
- * both exponent and base are positive - huge performance improvement
- * IS_ALMOST_DENORMAL: http://ardour.org/node/139 
- *                     https://github.com/gordonjcp/lysdr/blob/master/filter.c
- *****************************************************************************/
-
-float power (float b, float e) {
-
-  int   i;
-  float p = 1;
-
-  for (i = 1; i < e; i++) 
-    p *= b;
-  if (IS_ALMOST_DENORMAL (p))
-    p = 0;   
-  return p;
-}
 
 /*****************************************************************************
  * Copy input to output while compressing then applying the progressive filter
